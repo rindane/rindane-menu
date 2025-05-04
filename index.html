@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rindane Menü</title>
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    #tabs::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .product-description {
+      background-image: linear-gradient(rgba(255, 255, 255, .3), rgba(255, 255, 255, 0.9)), url('https://res.cloudinary.com/daowkdidj/image/upload/v1746115472/396278c7-fc1a-48f3-b36f-7dcfa4f0d004_rkpfv1.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    
+    .header-gradient {
+      background: radial-gradient(ellipse at center,#0284c7 0%, #01608f 100%);
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+  <!-- Header Bölümü -->
+  <header class="header-gradient text-white shadow-lg">
+    <div class="max-w-5xl mx-auto px-4 py-6">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <!-- Logo ve Restoran Adı -->
+        <div class="flex items-center gap-3">
+          <img src="https://res.cloudinary.com/daowkdidj/image/upload/v1746182808/3b22b65a-1a87-42fb-adca-3611f8bb4bf1_-_D%C3%BCzenlendi_b3yfvc.jpg" alt="Restoran Logo" class="h-12 rounded-full border-2 border-white">
+          <div>
+            <h1 class="text-2xl font-bold">Rindane Doğa</h1>
+            <p class="text-sm opacity-80 text-center">Restoran ve Davet Evi</p>
+          </div>
+        </div>
+        
+        <!-- İletişim Bilgileri -->
+        <div class="flex flex-col items-center md:items-end gap-1">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-phone-alt text-sm"></i>
+            <a href="tel:+905542472173" class="hover:underline">0554 247 21 73</a>
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            <i class="fas fa-map-marker-alt text-sm"></i>
+            <span>İhsaniye Mah. Aşağı Sokak 146/A Karasu/Sakarya</span>
+          </div>
+          <div class="flex items-center gap-2 mt-2">
+            <a href="https://instagram.com/rindanecafedavet" target="_blank" class="hover:text-pink-300">
+              <i class="fab fa-instagram text-xl"></i>
+            </a>
+            <a href="https://wa.me/905542472173" target="_blank" class="hover:text-green-300">
+              <i class="fab fa-whatsapp text-xl ml-2"></i>
+            </a>
+            <a href="https://maps.app.goo.gl/NqFd2KLeHv4FfBWr8" target="_blank" class="hover:text-green-300">
+              <i class="fas fa-map-marker-alt text-xl ml-2"></i> &nbsp; Haritada Aç
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-5xl mx-auto py-5 px-4">
+    <h1 class="text-4xl font-bold text-center text-sky-700 mb-8">Menümüz</h1>
+
+    <!-- Scrollable tab'lar -->
+    <div id="tabs" class="flex gap-2 overflow-x-auto pb-2 mb-6 border-b border-gray-300 whitespace-nowrap"></div>
+
+    <!-- Ürün kartları -->
+    <div id="menuItems" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </div>
+
+  <script>
+    const sheetID = '1o1WZkZerCJU6SkzaP8oHop7pUoGuoBeQpzLvShZpLMQ';
+    const sheetName = 'Sayfa1';
+    const url = `https://opensheet.elk.sh/${sheetID}/${sheetName}`;
+
+    let allData = [];
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        allData = data;
+        const categories = [...new Set(data.map(item => item['Kategori']))];
+        const tabsContainer = document.getElementById('tabs');
+
+        // "Tüm Ürünler" tabını ekle
+        const allBtn = document.createElement('button');
+        allBtn.textContent = 'Tüm Ürünler';
+        allBtn.className = 'px-4 py-2 rounded-full border bg-sky-600 text-white shrink-0';
+        allBtn.onclick = () => {
+          activateTab(allBtn);
+          renderItems(); // tümünü göster
+        };
+        tabsContainer.appendChild(allBtn);
+
+        // Diğer kategoriler
+        categories.forEach(cat => {
+          if(cat){
+            const btn = document.createElement('button');
+            btn.textContent = cat;
+            btn.className = 'px-4 py-2 rounded-full border bg-white text-sky-600 shrink-0';
+            btn.onclick = () => {
+              activateTab(btn);
+              renderItems(cat);
+            };
+            tabsContainer.appendChild(btn);
+          }
+
+        });
+
+        // Sayfa yüklenince "Tüm Ürünler" tabı aktif olsun
+        renderItems(); // tüm ürünleri göster
+      });
+
+    function activateTab(activeButton) {
+      document.querySelectorAll('#tabs button').forEach(btn => {
+        btn.className = 'px-4 py-2 rounded-full border bg-white text-sky-600 shrink-0';
+      });
+      activeButton.className = 'px-4 py-2 rounded-full border bg-sky-600 text-white shrink-0';
+    }
+
+    function renderItems(category = null) {
+      const container = document.getElementById('menuItems');
+      container.innerHTML = '';
+
+      allData
+        .filter(item => !category || item['Kategori'] === category)
+        .forEach(item => {
+          if(item['Kategori'] && item['Ürün Adı'] && item['Fiyat']) {
+            const card = document.createElement('div');
+          card.className = 'bg-white rounded-lg shadow-md overflow-hidden border-2 border-sky-600';
+
+          const imageHtml = item['Fotoğraf URL']
+            ? `<img src="${item['Fotoğraf URL']}" alt="${item['Ürün Adı']}" class="w-full h-64 object-cover">`
+            : '';
+
+          card.innerHTML = `
+            ${imageHtml}
+            <div class="p-5 product-description">
+              <h2 class="text-xl font-semibold mb-2">${item['Ürün Adı']}</h2>
+              ${item['Açıklama'] ? `<p class="text-gray-800 font-medium mb-2">${item['Açıklama']}</p>` : ''}
+              <div class="text-lg font-bold text-sky-700">${item['Fiyat']} TL</div>
+            </div>
+          `;
+
+          container.appendChild(card);
+          }
+        });
+    }
+  </script>
+
+</body>
+</html>
